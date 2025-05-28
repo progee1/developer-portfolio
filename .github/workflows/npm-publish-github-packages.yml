@@ -5,12 +5,16 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  id-token: write  # 👈 This is required for OIDC authentication (used by deploy-pages)
+
 concurrency:
   group: pages-deployment
   cancel-in-progress: true
 
 jobs:
-  pages-deployment:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -21,8 +25,6 @@ jobs:
 
       - name: Build your site
         run: |
-          # Add your build steps here
-          echo "Pretending to build..."
           mkdir -p dist
           echo "<h1>Hello World</h1>" > dist/index.html
 
