@@ -1,52 +1,22 @@
-
-2. **Adjust the Workflow:**
-**.
-
-2. **Retry the Failed Deployment**:
-To prevent this issue in the future, you can modify the   Once the conflicting deployment is canceled, re workflow to check for in-progress deployments and handle them gracefully. Here's an updated snippet for the-run the failed job by:
-- Navigating to the failed workflow in the `pages-build-deployment` **Actions** tab.
-- workflow Clicking:
-
-**  Re ```yaml
 jobs:
-  deploy:
+  pages-deployment:
     runs-on: ubuntu-latest
--run jobs**.
-
-3. **Prevent Future Conflicts**:
-Modify your deployment workflow to handle overlapping deployments.       steps:
-      - name: Check for existing deployments
-Add a condition to cancel in-progress deployments           run: |
-          EXISTING_DEP automatically before starting a new one. Here's an example modification for your `pages-buildLOYMENT=$(gh api /repos/progee1/developer-portfolio/pages/de-deployment` workflow:
-
-```yaml
-name: pages-build-deployment --jq '.id' 2>/dev/null || echo "none")
-ployment
-
-on:
-  push:
-    branches:
-      - main             if [ "$EXISTING_DEPLOYMENT" != "none
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest" ]; then
-            echo "Found existing deployment: $
     steps:
       - name: Checkout code
-        usesEXISTING_DEPLOYMENT. Cancelling..."
-            gh api --method DELETE /repos/progee1/developer: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Deploy- Pagesportfolio
-/pages/de          ployment uses/$:EX actionsIST/deINGploy_DEP-pagesLOY@MENTv
-4            
-fi          
-
-with        :
--             name cancel:-in Deploy-progress to: Git trueHub
-Pages
-        uses: actions/deploy-pages@   ```
-
-Add the `cancel-in-progress: true` option tov4
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
         with:
-          token: ${{ secrets.GITHUB the `deploy-pages` step to ensure that any ongoing deployments are canceled before starting a new_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Retry Deployment on Conflict
+        if: failure()
+        run: |
+          echo "Initial deployment failed. Waiting 30 seconds before retry..."
+          sleep 30
+          echo "Retrying deployment..."
+          gh workflow run <workflow-file-name> --ref ${{ github.ref }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
