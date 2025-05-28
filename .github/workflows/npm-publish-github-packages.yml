@@ -17,6 +17,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:  # Add this block
+      name: github-pages  # The environment name must match your GitHub Pages environment
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
