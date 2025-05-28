@@ -1,3 +1,14 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: pages-deployment
+  cancel-in-progress: true
+
 jobs:
   pages-deployment:
     runs-on: ubuntu-latest
@@ -5,18 +16,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to GitHub Pages
-        id: deploy
-        uses: actions/deploy-pages@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
-      - name: Retry Deployment on Conflict
-        if: failure()
+      - name: Build your site
         run: |
-          echo "Initial deployment failed. Waiting 30 seconds before retry..."
-          sleep 30
-          echo "Retrying deployment..."
-          gh workflow run <workflow-file-name> --ref ${{ github.ref }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Add your build steps here
+          echo "Pretending to build..."
+          mkdir -p dist
+          echo "<h1>Hello World</h1>" > dist/index.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
